@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teacher Dashboard | Attendance Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+
+:root {
+  --navy: #1e2a78;
+  --blue: #1976d2;
+  --teal: #2f7fa1;
+  --orange: #ef6c00;
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --text: #1a2332;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --present: #16a34a;
+  --absent: #dc2626;
+}
+
+body { background: var(--bg); color: var(--text); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: linear-gradient(160deg, var(--navy) 0%, #1a3a6b 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-brand h2 { font-size: 18px; font-weight: 700; }
+.sidebar-brand p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+.profile-card {
+  padding: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.profile-avatar {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #1976d2, #2f7fa1);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 700; color: #fff;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 20px rgba(25,118,210,0.4);
+}
+
+.profile-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.profile-role { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.profile-detail { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+.profile-detail span { color: rgba(255,255,255,0.5); }
+
+.sidebar-nav { padding: 16px 12px; flex: 1; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.65);
+  cursor: pointer; transition: all 0.2s; margin-bottom: 4px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+.nav-item .icon { font-size: 18px; width: 22px; }
+
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+.logout-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 10px;
+  font-size: 14px; color: rgba(255,255,255,0.6);
+  cursor: pointer; transition: all 0.2s;
+  width: 100%; background: none; border: none;
+  font-family: 'Outfit', sans-serif;
+}
+.logout-btn:hover { background: rgba(220,38,38,0.2); color: #fca5a5; }
+
+/* ── MAIN ── */
+.main { display: flex; flex-direction: column; overflow-y: auto; }
+
+.topbar {
+  background: var(--card);
+  padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+
+.topbar h1 { font-size: 20px; font-weight: 700; }
+.topbar p { font-size: 13px; color: var(--muted); }
+
+.mini-calendar {
+  background: linear-gradient(135deg, var(--navy), var(--teal));
+  color: #fff; border-radius: 12px; padding: 12px 18px; min-width: 220px;
+}
+
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; font-weight: 600; }
+.cal-header button { background: rgba(255,255,255,0.15); border: none; color: #fff; width: 24px; height: 24px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 11px; }
+.cal-day-label { text-align: center; color: rgba(255,255,255,0.5); padding: 2px 0; font-size: 10px; }
+.cal-day { text-align: center; padding: 4px 2px; border-radius: 4px; cursor: pointer; }
+.cal-day:hover { background: rgba(255,255,255,0.15); }
+.cal-day.today { background: var(--orange); font-weight: 700; border-radius: 50%; }
+.cal-day.other-month { color: rgba(255,255,255,0.3); }
+
+.content { padding: 28px; flex: 1; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Class selector */
+.class-selector {
+  display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
+}
+
+.class-btn {
+  padding: 8px 20px; border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--card); color: var(--text);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: 'Outfit', sans-serif; transition: all 0.2s;
+}
+.class-btn:hover { border-color: var(--blue); color: var(--blue); }
+.class-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 4px 12px rgba(25,118,210,0.3); }
+
+/* Subject selector */
+.subject-tabs {
+  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+}
+
+.subj-tab {
+  padding: 8px 16px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--card); color: var(--text);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  font-family: 'Outfit', sans-serif; transition: all 0.2s;
+}
+.subj-tab:hover { border-color: var(--teal); }
+.subj-tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* Date picker */
+.date-row {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+
+.date-row label { font-size: 14px; font-weight: 600; color: var(--text); }
+.date-row input[type="date"] {
+  padding: 9px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 14px; color: var(--text); font-family: 'Outfit', sans-serif;
+  outline: none; cursor: pointer;
+}
+.date-row input[type="date"]:focus { border-color: var(--blue); }
+
+/* Student attendance list */
+.att-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+
+.att-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: all 0.15s;
+}
+.att-row:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
+
+.student-info { display: flex; align-items: center; gap: 12px; }
+
+.student-avatar {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--navy), var(--teal));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+}
+
+.student-name { font-size: 14px; font-weight: 600; }
+.student-roll { font-size: 12px; color: var(--muted); }
+
+.att-toggle {
+  display: flex; gap: 8px;
+}
+
+.att-btn {
+  padding: 7px 18px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: 'Outfit', sans-serif; transition: all 0.2s;
+  background: var(--card);
+}
+
+.att-btn.present { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+.att-btn.absent { background: #fee2e2; border-color: #dc2626; color: #b91c1c; }
+.att-btn:hover { transform: scale(1.03); }
+
+/* Save button */
+.save-btn {
+  padding: 12px 32px; background: linear-gradient(135deg, var(--blue), #1565c0);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  box-shadow: 0 6px 20px rgba(25,118,210,0.4);
+  transition: all 0.2s;
+}
+.save-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(25,118,210,0.5); }
+
+.success-toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #15803d; color: #fff;
+  padding: 14px 24px; border-radius: 12px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transform: translateY(100px); opacity: 0;
+  transition: all 0.3s; z-index: 9999;
+}
+.success-toast.show { transform: translateY(0); opacity: 1; }
+
+/* Attendance calendar view */
+.cal-view-card {
+  background: var(--card);
+  border-radius: 16px; padding: 24px;
+  border: 1px solid var(--border); margin-top: 24px;
+}
+
+.full-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.full-cal-header h3 { font-size: 15px; font-weight: 600; }
+.full-cal-nav { display: flex; gap: 8px; }
+.full-cal-nav button { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; font-family: 'Outfit', sans-serif; }
+.full-cal-nav button:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+.full-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.full-cal-label { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 0; text-transform: uppercase; }
+.full-cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; position: relative; }
+.full-cal-day:hover { background: #e0f2f1; }
+.full-cal-day.other-month { color: #cbd5e1; }
+.full-cal-day.today-mark { border: 2px solid var(--blue); font-weight: 700; }
+.full-cal-day.has-data { background: #dbeafe; font-weight: 700; color: var(--blue); }
+
+/* Upload */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 14px; padding: 30px;
+  text-align: center; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 20px;
+  background: var(--card);
+}
+.upload-zone:hover { border-color: var(--blue); background: #f0f7ff; }
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-zone h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.upload-zone p { font-size: 13px; color: var(--muted); }
+.upload-zone input { display: none; }
+
+.upload-btn {
+  padding: 10px 24px; background: var(--blue); color: #fff;
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: 'Outfit', sans-serif; margin-top: 12px;
+}
+
+/* Announcements */
+.ann-form {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px; margin-bottom: 28px;
+}
+
+.ann-form h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 14px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--blue); }
+.form-group textarea { resize: vertical; min-height: 90px; }
+
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.toggle-row label { font-size: 14px; font-weight: 500; }
+
+.post-btn {
+  padding: 12px 28px; background: linear-gradient(135deg, var(--orange), #f57c00);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  box-shadow: 0 6px 20px rgba(239,108,0,0.4);
+  transition: all 0.2s;
+}
+.post-btn:hover { transform: translateY(-1px); }
+
+.ann-list { display: flex; flex-direction: column; gap: 14px; }
+.ann-card {
+  background: var(--card); border-radius: 14px; padding: 20px;
+  border: 1px solid var(--border); border-left: 4px solid var(--orange);
+  position: relative;
+}
+.ann-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.ann-message { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+.ann-meta { font-size: 12px; color: #94a3b8; display: flex; gap: 16px; }
+.ann-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: #fef3c7; color: #92400e; margin-bottom: 6px; }
+.ann-badge.public { background: #fce7f3; color: #9d174d; }
+.del-btn { position: absolute; top: 14px; right: 14px; background: none; border: none; cursor: pointer; font-size: 16px; color: #94a3b8; }
+.del-btn:hover { color: var(--absent); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+.section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+/* Sub-tabs for Mark/Records */
+.sub-tabs {
+  display: flex;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.sub-tab {
+  padding: 10px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.sub-tab:hover { color: var(--blue); }
+.sub-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* Records List Styles */
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.record-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+.record-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.record-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.record-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.stat-item {
+  text-align: right;
+}
+
+.stat-val {
+  font-size: 16px;
+  font-weight: 700;
+  display: block;
+}
+
+.stat-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.view-history-btn {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.view-history-btn:hover { background: #e3f2fd; }
+
+.history-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+  display: none;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.history-tag {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tag-present { background: #dcfce7; color: #15803d; }
+.tag-absent { background: #fee2e2; color: #b91c1c; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>📋 AttendanceTrack</h2>
+      <p>Teacher Portal</p>
+    </div>
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileInitial">T</div>
+      <div class="profile-name" id="profileName">Loading...</div>
+      <div class="profile-role">Teacher</div>
+      <div class="profile-detail"><span>Dept: </span><span id="profileDept">—</span></div>
+      <div class="profile-detail"><span>Email: </span><span id="profileEmail">—</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="switchTab('attendance', this)">
+        <span class="icon">📅</span> Attendance
+      </div>
+      <div class="nav-item" onclick="switchTab('announcements', this)">
+        <span class="icon">📢</span> Announcements
+      </div>
+      <div class="nav-item" onclick="switchTab('upload', this)">
+        <span class="icon">📤</span> Upload Students
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="tabTitle">Mark Attendance</h1>
+        <p id="tabSubtitle">Select a class and subject to get started</p>
+      </div>
+      <div class="mini-calendar" id="miniCal"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ATTENDANCE TAB -->
+      <div class="tab-panel active" id="tab-attendance">
+        <div class="section-title">Select Class</div>
+        <div class="class-selector" id="classSelector"></div>
+
+        <div id="subjectSection" style="display:none">
+          <div class="section-title">Select Subject</div>
+          <div class="subject-tabs" id="subjectTabs"></div>
+
+          <div id="markSection" style="display:none">
+            <div class="sub-tabs">
+              <div class="sub-tab active" id="sub-tab-mark" onclick="switchSubTab('mark')">Mark Attendance</div>
+              <div class="sub-tab" id="sub-tab-records" onclick="switchSubTab('records')">Student Records</div>
+            </div>
+
+            <div id="sub-panel-mark">
+              <div class="date-row">
+                <label>📅 Date:</label>
+                <input type="date" id="attendanceDate">
+              </div>
+
+              <div class="att-list" id="studentList"></div>
+
+              <button class="save-btn" onclick="saveAttendance()">💾 Save Attendance</button>
+
+              <div class="cal-view-card" id="calViewCard" style="display:none">
+                <div class="full-cal-header">
+                  <h3 id="calMonthYear"></h3>
+                  <div class="full-cal-nav">
+                    <button onclick="changeTeacherCal(-1)">← Prev</button>
+                    <button onclick="changeTeacherCal(1)">Next →</button>
+                  </div>
+                </div>
+                <div class="full-cal-grid" id="teacherCalGrid"></div>
+              </div>
+            </div>
+
+            <div id="sub-panel-records" style="display:none">
+              <div class="records-list" id="recordsList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS TAB -->
+      <div class="tab-panel" id="tab-announcements">
+        <div class="ann-form">
+          <h3>✍️ Post Announcement</h3>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="annTitle" placeholder="e.g. Assignment Due Tomorrow">
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea id="annMessage" placeholder="Write your announcement here..."></textarea>
+          </div>
+          <div class="form-group" id="classSelectGroup">
+            <label>Target Class</label>
+            <select id="annClass"></select>
+          </div>
+          <div class="toggle-row">
+            <input type="checkbox" id="isPublic" onchange="togglePublic()">
+            <label for="isPublic">📢 Send to ALL my classes (Public Announcement)</label>
+          </div>
+          <button class="post-btn" onclick="postAnnouncement()">📢 Post Announcement</button>
+        </div>
+
+        <div class="section-title">📋 Posted Announcements</div>
+        <div class="ann-list" id="annList">
+          <div class="empty-state"><div class="icon">⏳</div><p>Loading...</p></div>
+        </div>
+      </div>
+
+      <!-- UPLOAD TAB -->
+      <div class="tab-panel" id="tab-upload">
+        <div class="section-title">Upload Student List</div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label>Select Class</label>
+          <select id="uploadClass" style="padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;width:200px"></select>
+        </div>
+        <div id="manualAddSection" style="margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 24px;">
+          <div class="section-title">Manual Student Addition</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="manualName" placeholder="e.g. Rahul Kumar">
+            </div>
+            <div class="form-group">
+              <label>Roll Number</label>
+              <input type="text" id="manualRoll" placeholder="e.g. CSE001">
+            </div>
+          </div>
+          <button class="save-btn" onclick="addManualStudent()">➕ Add Student Individually</button>
+        </div>
+
+        <div class="section-title">Bulk Upload Student List</div>
+        <div class="upload-zone" onclick="document.getElementById('csvFile').click()">
+          <div class="upload-icon">📊</div>
+          <h3>Click to upload Excel/CSV file</h3>
+          <p>Format: Roll Number, Name (one per row)</p>
+          <p style="margin-top:6px;font-size:12px;color:#94a3b8">Example: 101, Rahul Kumar</p>
+          <input type="file" id="csvFile" accept=".csv,.xlsx" onchange="handleFileSelect(event)">
+          <div id="fileNameDisplay" style="margin-top:10px;font-size:13px;color:#1976d2;font-weight:600"></div>
+        </div>
+        <button class="upload-btn" onclick="uploadStudents()">📤 Upload Students</button>
+        <div id="uploadResult" style="margin-top:16px;font-size:14px;font-weight:500;color:#15803d"></div>
+
+        <div style="margin-top:28px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px">
+          <div class="section-title">📋 CSV Format Guide</div>
+          <p style="font-size:14px;color:#64748b;margin-bottom:12px">Your CSV file should look like this:</p>
+          <pre style="background:#f8fafc;padding:14px;border-radius:8px;font-size:13px;color:#334155;border:1px solid #e2e8f0">Roll No,Name
+CSE2023001,Rahul Kumar
+CSE2023002,Anjali Singh
+CSE2023003,Arjun Mehta</pre>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="success-toast" id="toast"></div>
+
+<script>
+const API = '';
+let token = localStorage.getItem('token');
+let user = JSON.parse(localStorage.getItem('user') || 'null');
+let classes = [];
+let allSubjects = [];
+let subjects = [];
+let selectedClass = null;
+let selectedSubject = null;
+let currentStudents = [];
+let attendanceMap = {};
+let teacherCalYear, teacherCalMonth;
+let subjectAttendanceRecords = [];
+let miniDate = new Date();
+
+if (!token || !user || user.role !== 'teacher') {
+  window.location.href = 'index.html';
+}
+
+window.onload = () => {
+  setProfile();
+  renderMiniCalendar();
+  loadClasses();
+  loadAnnouncements();
+  // Set today's date
+  const today = new Date();
+  document.getElementById('attendanceDate').value = today.toISOString().split('T')[0];
+};
+
+function setProfile() {
+  document.getElementById('profileInitial').textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = user.name;
+  document.getElementById('profileDept').textContent = user.department || 'CSE';
+  document.getElementById('profileEmail').textContent = user.email;
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+  const titles = { attendance: ['Mark Attendance', 'Select a class and subject'], announcements: ['Announcements', 'Post and manage announcements'], upload: ['Upload Students', 'Add students to your classes via CSV'] };
+  document.getElementById('tabTitle').textContent = titles[tab][0];
+  document.getElementById('tabSubtitle').textContent = titles[tab][1];
+}
+
+// ── CLASSES ──
+async function loadClasses() {
+  try {
+    const res = await fetch('/api/subjects/teacher/mine', { headers: { Authorization: 'Bearer ' + token } });
+    const subjects = await res.json();
+    // extract unique classes from subjects
+    classes = [...new Set(subjects.map(s => s.class))];
+    allSubjects = subjects;
+    renderClassButtons();
+    populateClassDropdowns();
+  } catch(e) { console.error(e); }
+}
+
+function renderClassButtons() {
+  document.getElementById('classSelector').innerHTML = classes.length
+    ? classes.map(c => `<button class="class-btn" onclick="selectClass('${c}', this)">${c}</button>`).join('')
+    : '<p style="color:#64748b;font-size:14px">No classes assigned yet.</p>';
+}
+
+function populateClassDropdowns() {
+  const opts = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('annClass').innerHTML = opts;
+  document.getElementById('uploadClass').innerHTML = opts;
+}
+
+async function selectClass(cls, btn) {
+  selectedClass = cls;
+  selectedSubject = null;
+  document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('subjectSection').style.display = 'block';
+  document.getElementById('markSection').style.display = 'none';
+  document.getElementById('calViewCard').style.display = 'none';
+  switchSubTab('mark');
+  await loadSubjects(cls);
+}
+
+async function loadSubjects(cls) {
+  const clsSubjects = allSubjects.filter(s => s.class === cls);
+  document.getElementById('subjectTabs').innerHTML = clsSubjects.map(s =>
+    `<button class="subj-tab" onclick="selectSubject('${s.subjectId || s._id}', '${s.name}', this)">${s.name}</button>`
+  ).join('');
+}
+
+async function selectSubject(subjectId, subjectName, btn) {
+  selectedSubject = subjectId;
+  document.querySelectorAll('.subj-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('markSection').style.display = 'block';
+  await loadStudentsForMarking();
+  await loadSubjectCalendar(subjectId);
+}
+
+async function loadStudentsForMarking() {
+  if (!selectedClass || !selectedSubject) return;
+  const date = document.getElementById('attendanceDate').value;
+  try {
+    const [studRes, attRes] = await Promise.all([
+      fetch(`/api/attendance/students/${selectedClass}`, { headers: { Authorization: 'Bearer ' + token } }),
+      fetch(`/api/attendance/subject/${selectedSubject}?date=${date}`, { headers: { Authorization: 'Bearer ' + token } })
+    ]);
+    currentStudents = await studRes.json();
+    subjectAttendanceRecords = await attRes.json();
+    renderStudentList(currentStudents);
+    renderStudentRecords();
+  } catch(e) { console.error(e); }
+}
+
+function renderStudentList(students) {
+  const date = document.getElementById('attendanceDate').value;
+  attendanceMap = {};
+  // Pre-fill from existing records
+  subjectAttendanceRecords.filter(r => r.date === date).forEach(r => {
+    attendanceMap[r.studentId] = r.status;
+  });
+
+  if (!students.length) {
+    document.getElementById('studentList').innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No students in this class yet. Upload students first.</p></div>';
+    return;
+  }
+
+  document.getElementById('studentList').innerHTML = students.map(s => `
+    <div class="att-row" id="row-${s._id}">
+      <div class="student-info">
+        <div class="student-avatar">${s.name.charAt(0)}</div>
+        <div>
+          <div class="student-name">${s.name}</div>
+          <div class="student-roll">${s.rollNo}</div>
+        </div>
+      </div>
+      <div class="att-toggle">
+        <button class="att-btn ${attendanceMap[s._id] === 'present' ? 'present' : ''}" onclick="markStudent('${s._id}', 'present', this)">✓ Present</button>
+        <button class="att-btn ${attendanceMap[s._id] === 'absent' ? 'absent' : ''}" onclick="markStudent('${s._id}', 'absent', this)">✗ Absent</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('attendanceDate').addEventListener('change', loadStudentsForMarking);
+});
+
+function markStudent(studentId, status, btn) {
+  attendanceMap[studentId] = status;
+  const row = btn.closest('.att-row');
+  row.querySelectorAll('.att-btn').forEach(b => { b.classList.remove('present','absent'); });
+  btn.classList.add(status);
+}
+
+async function saveAttendance() {
+  const date = document.getElementById('attendanceDate').value;
+  if (!date || !selectedSubject) return;
+  const entries = Object.entries(attendanceMap);
+  if (!entries.length) { showToast('⚠️ No attendance marked yet'); return; }
+  try {
+    await Promise.all(entries.map(([studentId, status]) =>
+      fetch('/api/attendance/mark', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ subjectId: selectedSubject, studentId, date, status })
+      })
+    ));
+    showToast('✅ Attendance saved successfully!');
+    await loadSubjectCalendar(selectedSubject);
+  } catch(e) { showToast('❌ Error saving attendance'); }
+}
+
+async function loadSubjectCalendar(subjectId) {
+  try {
+    const res = await fetch(`/api/attendance/subject/${subjectId}`, { headers: { Authorization: 'Bearer ' + token } });
+    subjectAttendanceRecords = await res.json();
+    const now = new Date();
+    teacherCalYear = now.getFullYear();
+    teacherCalMonth = now.getMonth();
+    document.getElementById('calViewCard').style.display = 'block';
+    renderTeacherCalendar();
+  } catch(e) { console.error(e); }
+}
+
+function renderTeacherCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthYear').textContent = `${months[teacherCalMonth]} ${teacherCalYear}`;
+  const firstDay = new Date(teacherCalYear, teacherCalMonth, 1).getDay();
+  const daysInMonth = new Date(teacherCalYear, teacherCalMonth + 1, 0).getDate();
+  const today = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = days.map(d => `<div class="full-cal-label">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) html += `<div class="full-cal-day other-month"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${teacherCalYear}-${String(teacherCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasData = subjectAttendanceRecords.some(r => r.date === dateStr);
+    const isToday = today.getFullYear() === teacherCalYear && today.getMonth() === teacherCalMonth && today.getDate() === d;
+    let cls = 'full-cal-day';
+    if (hasData) cls += ' has-data';
+    if (isToday) cls += ' today-mark';
+    html += `<div class="${cls}" onclick="jumpToDate('${dateStr}')">${d}</div>`;
+  }
+  document.getElementById('teacherCalGrid').innerHTML = html;
+}
+
+function jumpToDate(dateStr) {
+  document.getElementById('attendanceDate').value = dateStr;
+  loadStudentsForMarking();
+}
+
+function changeTeacherCal(dir) {
+  teacherCalMonth += dir;
+  if (teacherCalMonth > 11) { teacherCalMonth = 0; teacherCalYear++; }
+  if (teacherCalMonth < 0) { teacherCalMonth = 11; teacherCalYear--; }
+  renderTeacherCalendar();
+}
+
+// ── STUDENT RECORDS ──
+function switchSubTab(tab) {
+  document.getElementById('sub-panel-mark').style.display = tab === 'mark' ? 'block' : 'none';
+  document.getElementById('sub-panel-records').style.display = tab === 'records' ? 'block' : 'none';
+  document.getElementById('sub-tab-mark').classList.toggle('active', tab === 'mark');
+  document.getElementById('sub-tab-records').classList.toggle('active', tab === 'records');
+}
+
+async function renderStudentRecords() {
+  if (!currentStudents.length) return;
+  
+  // Need full subject records for aggregate stats
+  const res = await fetch(`/api/attendance/subject/${selectedSubject}`, { headers: { Authorization: 'Bearer ' + token } });
+  const allRecords = await res.json();
+
+  const list = document.getElementById('recordsList');
+  list.innerHTML = currentStudents.map(s => {
+    const sRecords = allRecords.filter(r => r.studentId === s._id);
+    const present = sRecords.filter(r => r.status === 'present').length;
+    const total = sRecords.length;
+    const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+    const color = percentage >= 75 ? 'var(--present)' : percentage >= 60 ? 'var(--orange)' : 'var(--absent)';
+
+    return `
+      <div class="record-row">
+        <div class="record-main">
+          <div class="record-info">
+            <div class="student-avatar">${s.name.charAt(0)}</div>
+            <div>
+              <div class="student-name">${s.name}</div>
+              <div class="student-roll">${s.rollNo}</div>
+            </div>
+          </div>
+          <div class="record-stats">
+            <div class="stat-item">
+              <span class="stat-val" style="color:${color}">${percentage}%</span>
+              <span class="stat-lbl">Attendance</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">${present}/${total}</span>
+              <span class="stat-lbl">Present</span>
+            </div>
+            <button class="view-history-btn" onclick="toggleHistory('${s._id}', this)">View Details</button>
+          </div>
+        </div>
+        <div class="history-details" id="history-${s._id}">
+          <div class="history-grid">
+            ${sRecords.sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `
+              <div class="history-tag ${r.status === 'present' ? 'tag-present' : 'tag-absent'}">
+                <span>${new Date(r.date).toLocaleDateString('en-IN', {day:'numeric', month:'short'})}</span>
+                <span>${r.status === 'present' ? '✓' : '✗'}</span>
+              </div>
+            `).join('') || '<p style="color:#64748b;font-size:12px">No records found</p>'}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleHistory(studentId, btn) {
+  const panel = document.getElementById(`history-${studentId}`);
+  const isHidden = panel.style.display === 'none' || panel.style.display === '';
+  panel.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Hide Details' : 'View Details';
+}
+
+// ── ANNOUNCEMENTS ──
+function togglePublic() {
+  const isPublic = document.getElementById('isPublic').checked;
+  document.getElementById('classSelectGroup').style.display = isPublic ? 'none' : 'block';
+}
+
+async function postAnnouncement() {
+  const title = document.getElementById('annTitle').value.trim();
+  const message = document.getElementById('annMessage').value.trim();
+  const isPublic = document.getElementById('isPublic').checked;
+  const targetClass = document.getElementById('annClass').value;
+  if (!title || !message) { showToast('⚠️ Please fill title and message'); return; }
+  try {
+    await fetch('/api/announcements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ title, message, targetClass, isPublic })
+    });
+    document.getElementById('annTitle').value = '';
+    document.getElementById('annMessage').value = '';
+    document.getElementById('isPublic').checked = false;
+    document.getElementById('classSelectGroup').style.display = 'block';
+    showToast('✅ Announcement posted!');
+    loadAnnouncements();
+  } catch(e) { showToast('❌ Error posting announcement'); }
+}
+
+async function loadAnnouncements() {
+  try {
+    const res = await fetch('/api/announcements/teacher/mine', { headers: { Authorization: 'Bearer ' + token } });
+    const anns = await res.json();
+    if (!anns.length) {
+      document.getElementById('annList').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No announcements posted yet</p></div>';
+      return;
+    }
+    document.getElementById('annList').innerHTML = anns.map(a => {
+      const date = new Date(a.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+      return `
+        <div class="ann-card">
+          <button class="del-btn" onclick="deleteAnn('${a._id}')">🗑</button>
+          ${a.isPublic ? '<span class="ann-badge public">📢 All Classes</span>' : `<span class="ann-badge">🏫 ${(a.targetClass || []).join(', ')}</span>`}
+          <div class="ann-title">${a.title}</div>
+          <div class="ann-message">${a.message}</div>
+          <div class="ann-meta"><span>📅 ${date}</span></div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+async function deleteAnn(id) {
+  await fetch('/api/announcements/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+  showToast('🗑 Announcement deleted');
+  loadAnnouncements();
+}
+
+// ── UPLOAD ──
+let selectedFile = null;
+function handleFileSelect(e) {
+  selectedFile = e.target.files[0];
+  if (selectedFile) document.getElementById('fileNameDisplay').textContent = '📄 ' + selectedFile.name;
+}
+
+async function uploadStudents() {
+  if (!selectedFile) { showToast('⚠️ Please select a file first'); return; }
+  const cls = document.getElementById('uploadClass').value;
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+  formData.append('className', cls);
+  try {
+    const res = await fetch('/api/subjects/upload-students', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('uploadResult').textContent = '✅ ' + data.message;
+    showToast('✅ Upload successful!');
+    selectedFile = null;
+    document.getElementById('csvFile').value = '';
+    document.getElementById('fileNameDisplay').textContent = '';
+  } catch(e) { showToast('❌ ' + e.message); }
+}
+
+async function addManualStudent() {
+  const name = document.getElementById('manualName').value.trim();
+  const rollNo = document.getElementById('manualRoll').value.trim();
+  const className = document.getElementById('uploadClass').value;
+
+  if (!name || !rollNo || !className) {
+    showToast('⚠️ Please fill all fields');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/subjects/add-student-manual', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ name, rollNo, className })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to add student');
+
+    showToast('✅ ' + data.message);
+    document.getElementById('manualName').value = '';
+    document.getElementById('manualRoll').value = '';
+    
+    // Refresh student lists if currently viewing them
+    if (selectedClass === className) {
+      loadStudentsForMarking();
+    }
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+// ── MINI CALENDAR ──
+function renderMiniCalendar() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const year = miniDate.getFullYear(), month = miniDate.getMonth();
+  const today = new Date();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let html = `<div class="cal-header"><button onclick="miniNav(-1)">‹</button><span>${months[month]} ${year}</span><button onclick="miniNav(1)">›</button></div><div class="cal-grid">`;
+  ['S','M','T','W','T','F','S'].forEach(d => html += `<div class="cal-day-label">${d}</div>`);
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    html += `<div class="cal-day ${isToday?'today':''}">${d}</div>`;
+  }
+  html += '</div>';
+  document.getElementById('miniCal').innerHTML = html;
+}
+
+function miniNav(dir) { miniDate.setMonth(miniDate.getMonth() + dir); renderMiniCalendar(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Tracker | Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{background:linear-gradient(135deg,#1e2a78,#2f7fa1);min-height:100vh;display:flex;font-family:'Poppins',sans-serif;}
+.page{display:flex;width:100%;min-height:100vh;}
+.hero-side{width:60%;padding:80px;color:#fff;display:flex;flex-direction:column;justify-content:center;}
+.hero-logo{display:flex;align-items:center;gap:12px;margin-bottom:50px;}
+.hero-logo .logo-icon{width:46px;height:46px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.hero-logo span{font-size:20px;font-weight:600;}
+.hero-side h1{font-size:46px;font-weight:700;line-height:1.2;margin-bottom:18px;}
+.hero-side h1 span{color:#7dd3fc;}
+.hero-side>p{color:rgba(255,255,255,0.75);font-size:15px;line-height:1.8;max-width:400px;margin-bottom:40px;}
+.hero-features{display:flex;flex-direction:column;gap:14px;}
+.feature-item{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.08);padding:14px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);max-width:370px;}
+.feature-item .icon{font-size:20px;min-width:28px;}
+.feature-item p{margin:0;font-size:13px;color:rgba(255,255,255,0.88);}
+.login-wrapper{width:40%;display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-card{background:#fff;width:100%;max-width:400px;padding:38px 36px;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,0.35);}
+.brand{text-align:center;margin-bottom:22px;}
+.brand h2{font-size:22px;font-weight:700;color:#1e2a78;}
+.brand p{color:#78909c;font-size:13px;margin-top:4px;}
+.role-tabs{display:flex;background:#f0f4f8;border-radius:10px;padding:4px;margin-bottom:20px;}
+.role-tabs button{flex:1;padding:9px 6px;border:none;background:transparent;color:#607d8b;font-weight:600;font-size:12px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;}
+.role-tabs button.active{background:#1976d2;color:white;box-shadow:0 4px 12px rgba(25,118,210,0.3);}
+.form-group{margin-bottom:13px;}
+.form-group label{display:block;font-size:12px;font-weight:500;color:#455a64;margin-bottom:5px;}
+.form-group input{width:100%;padding:10px 14px;border:1.5px solid #e0e7ef;border-radius:10px;font-size:13px;font-family:'Poppins',sans-serif;color:#263238;transition:border-color 0.2s;outline:none;}
+.form-group input:focus{border-color:#1976d2;box-shadow:0 0 0 3px rgba(25,118,210,0.08);}
+.main-btn{width:100%;padding:12px;background:linear-gradient(135deg,#1976d2,#1e2a78);border:none;border-radius:10px;color:white;font-size:14px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:6px;transition:all 0.2s;box-shadow:0 6px 20px rgba(25,118,210,0.3);}
+.main-btn:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(25,118,210,0.4);}
+.switch-text{text-align:center;font-size:13px;color:#78909c;margin-top:14px;}
+.switch-text span{color:#ef6c00;font-weight:600;cursor:pointer;}
+.error-msg{background:#fce4ec;color:#c62828;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none;}
+.success-msg{background:#e8f5e9;color:#2e7d32;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none;}
+.hidden{display:none!important;}
+@media(max-width:800px){.page{flex-direction:column;}.hero-side{width:100%;padding:40px;}.hero-side h1{font-size:30px;}.login-wrapper{width:100%;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero-side">
+    <div class="hero-logo"><div class="logo-icon">📋</div><span>AttendTrack</span></div>
+    <h1>Track Attendance.<br><span>Stay Organized.</span></h1>
+    <p>Smart system for teachers and students to manage class presence with ease.</p>
+    <div class="hero-features">
+      <div class="feature-item"><span class="icon">📅</span><p>Visual calendar attendance tracking per subject</p></div>
+      <div class="feature-item"><span class="icon">📢</span><p>Post announcements to your class instantly</p></div>
+      <div class="feature-item"><span class="icon">📊</span><p>Instant attendance percentage with 75% alerts</p></div>
+    </div>
+  </div>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="brand"><h2>Welcome Back</h2><p>College Attendance Portal</p></div>
+      <div class="role-tabs">
+        <button class="active" id="studentRoleBtn" onclick="setRole('student')">🎓 Student</button>
+        <button id="teacherRoleBtn" onclick="setRole('teacher')">👩‍🏫 Teacher</button>
+        <button id="adminRoleBtn" onclick="setRole('admin')">🔐 Admin</button>
+      </div>
+      <div id="errorMsg" class="error-msg"></div>
+      <div id="successMsg" class="success-msg"></div>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <div class="form-group"><label id="idLabel">College ID</label><input type="text" id="loginId" placeholder="e.g. STU001"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div>
+        <button class="main-btn" onclick="handleLogin()">Login →</button>
+        <p class="switch-text" id="registerLink">New here? <span onclick="showRegister()">Create account</span></p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerForm" class="hidden">
+        <div id="studentRegFields">
+          <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
+          <div class="form-group"><label>College ID</label><input type="text" id="regCollegeId" placeholder="e.g. STU001"></div>
+          <div class="form-group" id="regClassField"><label>Class</label><input type="text" id="regClass" placeholder="e.g. CSE-A"></div>
+          <div class="form-group" id="regRollField"><label>Roll Number</label><input type="text" id="regRoll" placeholder="e.g. 101"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="Min 8 characters"></div>
+        </div>
+        <div id="teacherRegFields" class="hidden">
+          <p style="font-size:13px;color:#455a64;margin-bottom:14px;background:#e3f2fd;padding:10px 14px;border-radius:8px;">Your College ID and email must match what admin has registered.</p>
+          <div class="form-group"><label>College ID (given by admin)</label><input type="text" id="tRegCollegeId" placeholder="e.g. TCH003"></div>
+          <div class="form-group"><label>Email (must match admin records)</label><input type="email" id="tRegEmail" placeholder="your@college.edu"></div>
+          <div class="form-group"><label>Set Password</label><input type="password" id="tRegPassword" placeholder="Min 8 characters"></div>
+        </div>
+        <button class="main-btn" onclick="handleRegister()">Create Account →</button>
+        <p class="switch-text">Already have an account? <span onclick="showLogin()">Login</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let currentRole = 'student';
+
+function setRole(role) {
+  currentRole = role;
+  ['student','teacher','admin'].forEach(r => document.getElementById(r+'RoleBtn').classList.toggle('active', r===role));
+  document.getElementById('idLabel').textContent = role === 'admin' ? 'Admin ID' : 'College ID';
+  document.getElementById('loginId').placeholder = role === 'admin' ? 'ADMIN001' : role === 'teacher' ? 'e.g. TCH001' : 'e.g. STU001';
+  document.getElementById('registerLink').style.display = role === 'admin' ? 'none' : 'block';
+  showLogin();
+}
+
+function showRegister() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.remove('hidden');
+  document.getElementById('studentRegFields').classList.toggle('hidden', currentRole === 'teacher');
+  document.getElementById('teacherRegFields').classList.toggle('hidden', currentRole !== 'teacher');
+  document.getElementById('regClassField').style.display = currentRole === 'student' ? 'block' : 'none';
+  document.getElementById('regRollField').style.display = currentRole === 'student' ? 'block' : 'none';
+}
+
+function showLogin() {
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('loginForm').classList.remove('hidden');
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+async function handleLogin() {
+  const collegeId = document.getElementById('loginId').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!collegeId || !password) return showError('Please fill in all fields');
+  try {
+    const res = await fetch('/api/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ collegeId, password, role: currentRole }) });
+    const data = await res.json();
+    if (!res.ok) return showError(data.error || 'Login failed');
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    if (data.user.role === 'teacher') window.location.href = 'teacher.html';
+    else if (data.user.role === 'admin') window.location.href = 'admin.html';
+    else window.location.href = 'student.html';
+  } catch { showError('Could not connect to server.'); }
+}
+
+async function handleRegister() {
+  try {
+    let body;
+    if (currentRole === 'teacher') {
+      const collegeId = document.getElementById('tRegCollegeId').value.trim();
+      const email = document.getElementById('tRegEmail').value.trim();
+      const password = document.getElementById('tRegPassword').value;
+      if (!collegeId || !email || !password) return showError('Please fill all fields');
+      if (password.length < 8) return showError('Password must be at least 8 characters');
+      body = { collegeId, email, password, role: 'teacher' };
+    } else {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const collegeId = document.getElementById('regCollegeId').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const className = document.getElementById('regClass').value.trim();
+      const rollNo = document.getElementById('regRoll').value.trim();
+      if (!name || !email || !collegeId || !password) return showError('Please fill all fields');
+      if (password.length < 8) return showError('Password must be at least 8 characters');
+      body = { name, email, collegeId, password, role: 'student', className, rollNo };
+    }
+    const res = await fetch('/api/auth/register', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) return showError(data.error || 'Registration failed');
+    showSuccess(data.message || 'Account created! Please login.');
+    showLogin();
+  } catch { showError('Could not connect to server.'); }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && !document.getElementById('loginForm').classList.contains('hidden')) handleLogin(); });
+</script>
+</body>
+</html>

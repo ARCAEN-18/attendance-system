@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | AttendTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:#f0f4f8;color:#263238;}
+.sidebar{position:fixed;left:0;top:0;width:230px;height:100vh;background:linear-gradient(180deg,#1e2a78,#2f7fa1);display:flex;flex-direction:column;padding:24px 0;z-index:100;}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid rgba(255,255,255,0.15);}
+.sidebar-logo .icon{width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.sidebar-logo span{color:#fff;font-weight:600;font-size:16px;}
+.nav-label{padding:14px 20px 4px;color:rgba(255,255,255,0.45);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:rgba(255,255,255,0.75);cursor:pointer;transition:all 0.2s;border-left:3px solid transparent;font-size:13px;}
+.nav-item:hover,.nav-item.active{background:rgba(255,255,255,0.12);color:#fff;border-left-color:#7dd3fc;}
+.ni{font-size:17px;min-width:20px;}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.15);}
+.logout-btn{width:100%;padding:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-family:'Poppins',sans-serif;font-size:13px;cursor:pointer;}
+.logout-btn:hover{background:rgba(255,255,255,0.2);}
+.main{margin-left:230px;padding:28px;min-height:100vh;}
+.page-header{margin-bottom:22px;}
+.page-header h1{font-size:21px;font-weight:600;color:#1e2a78;}
+.page-header p{color:#78909c;font-size:13px;margin-top:3px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+.stat-card{background:#fff;border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.blue{background:#e3f2fd;}.green{background:#e8f5e9;}.orange{background:#fff3e0;}.purple{background:#f3e5f5;}
+.stat-info h3{font-size:22px;font-weight:700;color:#263238;}
+.stat-info p{font-size:11px;color:#78909c;margin-top:1px;}
+.section{display:none;}.section.active{display:block;}
+.card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:18px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.card-header h2{font-size:15px;font-weight:600;color:#263238;}
+.add-btn{padding:8px 16px;background:linear-gradient(135deg,#1976d2,#1e2a78);color:#fff;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(25,118,210,0.3);}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:9px 13px;font-size:11px;font-weight:600;color:#78909c;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f0f4f8;}
+td{padding:11px 13px;font-size:13px;color:#455a64;border-bottom:1px solid #f8f9fa;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafbfc;}
+.action-btns{display:flex;gap:6px;}
+.edit-btn{padding:4px 11px;background:#e3f2fd;color:#1565c0;border:none;border-radius:6px;font-family:'Poppins',sans-serif;font-size:12px;cursor:pointer;}
+.edit-btn:hover{background:#1976d2;color:#fff;}
+.del-btn{padding:4px 11px;background:#fce4ec;color:#c62828;border:none;border-radius:6px;font-family:'Poppins',sans-serif;font-size:12px;cursor:pointer;}
+.del-btn:hover{background:#c62828;color:#fff;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:1000;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:26px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:18px;color:#1e2a78;}
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:11px;font-weight:500;color:#455a64;margin-bottom:4px;}
+.fg input,.fg select{width:100%;padding:9px 12px;border:1.5px solid #e0e7ef;border-radius:8px;font-size:13px;font-family:'Poppins',sans-serif;color:#263238;outline:none;}
+.fg input:focus,.fg select:focus{border-color:#1976d2;}
+.fg small{color:#78909c;font-size:11px;margin-top:3px;display:block;}
+.modal-btns{display:flex;gap:10px;margin-top:18px;}
+.modal-btns button{flex:1;padding:10px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;}
+.btn-cancel{background:#f0f4f8;color:#607d8b;}
+.btn-save{background:linear-gradient(135deg,#1976d2,#1e2a78);color:#fff;}
+.empty{text-align:center;padding:36px;color:#b0bec5;font-size:13px;}
+.msg{padding:9px 13px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none;}
+.msg.err{background:#fce4ec;color:#c62828;}
+.msg.ok{background:#e8f5e9;color:#2e7d32;}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;background:#e3f2fd;color:#1565c0;margin:1px;}
+.status-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.status-badge.active{background:#e8f5e9;color:#2e7d32;}
+.status-badge.pending{background:#fff3e0;color:#e65100;}
+.hint-box{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#2e7d32;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="icon">📋</div><span>AttendTrack</span></div>
+  <div class="nav-label">Management</div>
+  <div class="nav-item active" onclick="nav('overview',this)"><span class="ni">🏠</span> Overview</div>
+  <div class="nav-item" onclick="nav('classes',this)"><span class="ni">🏫</span> Classes</div>
+  <div class="nav-item" onclick="nav('teachers',this)"><span class="ni">👩‍🏫</span> Teachers</div>
+  <div class="nav-item" onclick="nav('subjects',this)"><span class="ni">📚</span> Subjects</div>
+  <div class="nav-item" onclick="nav('students',this)"><span class="ni">🎓</span> Students</div>
+  <div class="sidebar-footer"><button class="logout-btn" onclick="logout()">🚪 Logout</button></div>
+</div>
+
+<div class="main">
+  <!-- Overview -->
+  <div id="overview" class="section active">
+    <div class="page-header"><h1>Admin Dashboard</h1><p>Manage your institution</p></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon purple">🏫</div><div class="stat-info"><h3 id="sClasses">-</h3><p>Classes</p></div></div>
+      <div class="stat-card"><div class="stat-icon blue">👩‍🏫</div><div class="stat-info"><h3 id="sTeachers">-</h3><p>Teachers</p></div></div>
+      <div class="stat-card"><div class="stat-icon green">🎓</div><div class="stat-info"><h3 id="sStudents">-</h3><p>Students</p></div></div>
+      <div class="stat-card"><div class="stat-icon orange">📚</div><div class="stat-info"><h3 id="sSubjects">-</h3><p>Subject Assignments</p></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Quick Actions</h2></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="add-btn" onclick="nav('classes');openModal('class')">+ Add Class</button>
+        <button class="add-btn" onclick="nav('teachers');openModal('teacher')">+ Add Teacher</button>
+        <button class="add-btn" onclick="nav('subjects');openSubjectModal()">+ Assign Subject</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>How it works</h2></div>
+      <div style="font-size:13px;color:#455a64;line-height:2;">
+        <div>1. <strong>Add classes</strong> first (CSE-A, CSE-B etc)</div>
+        <div>2. <strong>Add teachers</strong> with name, email and college ID — no password needed</div>
+        <div>3. Teacher goes to login page → Register as Teacher → enters college ID + email → sets own password</div>
+        <div>4. <strong>Assign subjects</strong> — pick course code, class and teacher</div>
+        <div>5. Same course code can have different teachers for different classes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classes -->
+  <div id="classes" class="section">
+    <div class="page-header"><h1>Classes / Branches</h1><p>Add classes like CSE-A, CSE-B. Students can only register if their class exists here.</p></div>
+    <div class="card">
+      <div class="card-header"><h2>All Classes</h2><button class="add-btn" onclick="openModal('class')">+ Add Class</button></div>
+      <div id="classOk" class="msg ok"></div><div id="classErr" class="msg err"></div>
+      <table>
+        <thead><tr><th>Class Name</th><th>Department</th><th>Year</th><th>Action</th></tr></thead>
+        <tbody id="classTable"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Teachers -->
+  <div id="teachers" class="section">
+    <div class="page-header"><h1>Teachers</h1><p>Add teachers here. They will register on the login page using their email to set a password.</p></div>
+    <div class="card">
+      <div class="card-header"><h2>All Teachers</h2><button class="add-btn" onclick="openModal('teacher')">+ Add Teacher</button></div>
+      <div id="teacherOk" class="msg ok"></div><div id="teacherErr" class="msg err"></div>
+      <table>
+        <thead><tr><th>Name</th><th>College ID</th><th>Email</th><th>Department</th><th>Actions</th></tr></thead>
+        <tbody id="teacherTable"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Subjects -->
+  <div id="subjects" class="section">
+    <div class="page-header"><h1>Subject Assignments</h1><p>Same course code can be assigned to different classes with different teachers.</p></div>
+    <div class="card">
+      <div class="card-header"><h2>All Assignments</h2><button class="add-btn" onclick="openSubjectModal()">+ Assign Subject</button></div>
+      <div id="subjectOk" class="msg ok"></div><div id="subjectErr" class="msg err"></div>
+      <table>
+        <thead><tr><th>Subject Name</th><th>Course Code</th><th>Class</th><th>Teacher ID</th><th>Actions</th></tr></thead>
+        <tbody id="subjectTable"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Students -->
+  <div id="students" class="section">
+    <div class="page-header"><h1>Students</h1><p>Students who have registered on the portal</p></div>
+    <div class="card">
+      <div class="card-header"><h2>All Students</h2></div>
+      <table>
+        <thead><tr><th>Name</th><th>College ID</th><th>Class</th><th>Roll No</th><th>Action</th></tr></thead>
+        <tbody id="studentTable"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Class Modal -->
+<div class="modal-overlay" id="classModal">
+  <div class="modal">
+    <h3>🏫 Add New Class</h3>
+    <div id="classModalErr" class="msg err"></div>
+    <div class="fg"><label>Class Name *</label><input id="cName" placeholder="e.g. CSE-A"><small>This is what students will enter during registration</small></div>
+    <div class="fg"><label>Department</label><input id="cDept" placeholder="e.g. Computer Science"></div>
+    <div class="fg"><label>Year</label><input id="cYear" placeholder="e.g. 2nd Year"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('class')">Cancel</button>
+      <button class="btn-save" onclick="addClass()">Add Class</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Teacher Modal -->
+<div class="modal-overlay" id="teacherModal">
+  <div class="modal">
+    <h3>👩‍🏫 Add New Teacher</h3>
+    <div class="hint-box">No password needed! Teacher will register on the login page using their email to set their own password.</div>
+    <div id="teacherModalErr" class="msg err"></div>
+    <div class="fg"><label>Full Name *</label><input id="tName" placeholder="Dr. John Smith"></div>
+    <div class="fg"><label>Email * (teacher must use this exact email to register)</label><input type="email" id="tEmail" placeholder="john@college.edu"></div>
+    <div class="fg"><label>College ID * (share this with teacher)</label><input id="tId" placeholder="TCH003"></div>
+    <div class="fg"><label>Department</label><input id="tDept" placeholder="Computer Science"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('teacher')">Cancel</button>
+      <button class="btn-save" onclick="addTeacher()">Add Teacher</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Teacher Modal -->
+<div class="modal-overlay" id="editTeacherModal">
+  <div class="modal">
+    <h3>✏️ Edit Teacher</h3>
+    <div id="editTeacherErr" class="msg err"></div>
+    <input type="hidden" id="editTeacherId">
+    <div class="fg"><label>Full Name</label><input id="etName" placeholder="Dr. John Smith"></div>
+    <div class="fg"><label>Email</label><input type="email" id="etEmail"></div>
+    <div class="fg"><label>Department</label><input id="etDept"></div>
+    <div class="fg"><label>Classes (comma separated)</label><input id="etClasses" placeholder="CSE-A, CSE-B"><small>Update which classes this teacher handles this semester</small></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('editTeacher')">Cancel</button>
+      <button class="btn-save" onclick="saveTeacher()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Subject Modal -->
+<div class="modal-overlay" id="subjectModal">
+  <div class="modal">
+    <h3>📚 Assign Subject to Class</h3>
+    <div id="subjectModalErr" class="msg err"></div>
+    <div class="fg"><label>Subject Name *</label><input id="sName" placeholder="Data Structures"></div>
+    <div class="fg"><label>Course Code * (e.g. CS301)</label><input id="sCode" placeholder="CS301"><small>Same code can be assigned to multiple classes with different teachers</small></div>
+    <div class="fg"><label>Class / Branch *</label>
+      <select id="sClass"><option value="">-- Select Class --</option></select>
+    </div>
+    <div class="fg"><label>Teacher *</label>
+      <select id="sTeacher"><option value="">-- Select Teacher --</option></select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('subject')">Cancel</button>
+      <button class="btn-save" onclick="addSubject()">Assign Subject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Subject Modal (change teacher only) -->
+<div class="modal-overlay" id="editSubjectModal">
+  <div class="modal">
+    <h3>✏️ Change Subject Teacher</h3>
+    <div id="editSubjectErr" class="msg err"></div>
+    <input type="hidden" id="editSubjectId">
+    <div class="fg"><label>Subject</label><input id="esName" disabled style="background:#f5f5f5;"></div>
+    <div class="fg"><label>Course Code</label><input id="esCode" disabled style="background:#f5f5f5;"></div>
+    <div class="fg"><label>Class</label><input id="esClass" disabled style="background:#f5f5f5;"></div>
+    <div class="fg"><label>New Teacher *</label>
+      <select id="esTeacher"><option value="">-- Select Teacher --</option></select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('editSubject')">Cancel</button>
+      <button class="btn-save" onclick="saveSubject()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+if (!token || user.role !== 'admin') window.location.href = 'index.html';
+
+const H = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+
+function nav(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'classes') loadClasses();
+  if (name === 'teachers') loadTeachers();
+  if (name === 'subjects') loadSubjects();
+  if (name === 'students') loadStudents();
+  if (name === 'overview') loadStats();
+}
+
+function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+function openModal(t) { document.getElementById(t + 'Modal').classList.add('open'); }
+function closeModal(t) { document.getElementById(t + 'Modal').classList.remove('open'); }
+
+function showMsg(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = 'msg ' + type; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+async function loadStats() {
+  const d = await fetch('/api/admin/stats', { headers: H }).then(r => r.json());
+  document.getElementById('sClasses').textContent = d.classes || 0;
+  document.getElementById('sTeachers').textContent = d.teachers || 0;
+  document.getElementById('sStudents').textContent = d.students || 0;
+  document.getElementById('sSubjects').textContent = d.subjects || 0;
+}
+
+// ── CLASSES ──
+async function loadClasses() {
+  const data = await fetch('/api/admin/classes', { headers: H }).then(r => r.json());
+  const tb = document.getElementById('classTable');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="4" class="empty">No classes yet. Add one to get started!</td></tr>'; return; }
+  tb.innerHTML = data.map(c => `<tr>
+    <td><strong>${c.name}</strong></td>
+    <td>${c.department || '-'}</td>
+    <td>${c.year || '-'}</td>
+    <td><button class="del-btn" onclick="deleteClass('${c._id}')">Delete</button></td>
+  </tr>`).join('');
+}
+
+async function addClass() {
+  const name = document.getElementById('cName').value.trim();
+  if (!name) { showMsg('classModalErr', 'Class name is required', 'err'); return; }
+  const res = await fetch('/api/admin/classes', { method: 'POST', headers: H, body: JSON.stringify({ name, department: document.getElementById('cDept').value.trim(), year: document.getElementById('cYear').value.trim() }) });
+  const d = await res.json();
+  if (!res.ok) { showMsg('classModalErr', d.error, 'err'); return; }
+  closeModal('class');
+  document.getElementById('cName').value = ''; document.getElementById('cDept').value = ''; document.getElementById('cYear').value = '';
+  showMsg('classOk', 'Class added ✅', 'ok');
+  loadClasses(); loadStats();
+}
+
+async function deleteClass(id) {
+  if (!confirm('Delete this class?')) return;
+  await fetch('/api/admin/classes/' + id, { method: 'DELETE', headers: H });
+  loadClasses(); loadStats();
+}
+
+// ── TEACHERS ──
+async function loadTeachers() {
+  const data = await fetch('/api/admin/teachers', { headers: H }).then(r => r.json());
+  const tb = document.getElementById('teacherTable');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">No teachers yet.</td></tr>'; return; }
+  tb.innerHTML = data.map(t => `<tr>
+    <td><strong>${t.name}</strong></td>
+    <td>${t.collegeId}</td>
+    <td>${t.email}</td>
+    <td>${t.department || '-'}</td>
+    <td><div class="action-btns">
+      <button class="edit-btn" onclick="openEditTeacher('${t._id}','${t.name}','${t.email}','${t.department||''}','${(t.classes||[]).join(', ')}')">Edit</button>
+      <button class="del-btn" onclick="deleteTeacher('${t._id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+async function addTeacher() {
+  const name = document.getElementById('tName').value.trim();
+  const email = document.getElementById('tEmail').value.trim();
+  const collegeId = document.getElementById('tId').value.trim();
+  const department = document.getElementById('tDept').value.trim();
+  if (!name || !email || !collegeId) { showMsg('teacherModalErr', 'Name, email and College ID are required', 'err'); return; }
+  const res = await fetch('/api/admin/teachers', { method: 'POST', headers: H, body: JSON.stringify({ name, email, collegeId, department }) });
+  const d = await res.json();
+  if (!res.ok) { showMsg('teacherModalErr', d.error, 'err'); return; }
+  closeModal('teacher');
+  document.getElementById('tName').value = ''; document.getElementById('tEmail').value = ''; document.getElementById('tId').value = ''; document.getElementById('tDept').value = '';
+  showMsg('teacherOk', `Teacher added ✅ Share College ID "${collegeId}" with them to register.`, 'ok');
+  loadTeachers(); loadStats();
+}
+
+function openEditTeacher(id, name, email, dept, classes) {
+  document.getElementById('editTeacherId').value = id;
+  document.getElementById('etName').value = name;
+  document.getElementById('etEmail').value = email;
+  document.getElementById('etDept').value = dept;
+  document.getElementById('etClasses').value = classes;
+  openModal('editTeacher');
+}
+
+async function saveTeacher() {
+  const id = document.getElementById('editTeacherId').value;
+  const name = document.getElementById('etName').value.trim();
+  const email = document.getElementById('etEmail').value.trim();
+  const department = document.getElementById('etDept').value.trim();
+  const classesRaw = document.getElementById('etClasses').value.trim();
+  const classes = classesRaw ? classesRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
+
+  // Check all classes exist before even calling API
+  if (classes.length > 0) {
+    const existingClasses = await fetch('/api/admin/classes', { headers: H }).then(r => r.json());
+    const existingNames = existingClasses.map(c => c.name);
+    const invalid = classes.filter(c => !existingNames.includes(c));
+    if (invalid.length > 0) {
+      alert(`❌ These classes don't exist in the system:\n\n${invalid.join(', ')}\n\nPlease add them first from the Classes section.`);
+      return;
+    }
+  }
+
+  const res = await fetch('/api/admin/teachers/' + id, { method: 'PUT', headers: H, body: JSON.stringify({ name, email, department, classes }) });
+  const d = await res.json();
+  if (!res.ok) { showMsg('editTeacherErr', d.error, 'err'); return; }
+  closeModal('editTeacher');
+  showMsg('teacherOk', 'Teacher updated ✅', 'ok');
+  loadTeachers();
+}
+
+async function deleteTeacher(id) {
+  if (!confirm('Delete this teacher?')) return;
+  await fetch('/api/admin/teachers/' + id, { method: 'DELETE', headers: H });
+  loadTeachers(); loadStats();
+}
+
+// ── SUBJECTS ──
+async function loadSubjects() {
+  const data = await fetch('/api/admin/subjects', { headers: H }).then(r => r.json());
+  const tb = document.getElementById('subjectTable');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">No subjects assigned yet.</td></tr>'; return; }
+  tb.innerHTML = data.map(s => `<tr>
+    <td><strong>${s.name}</strong></td>
+    <td><span class="tag">${s.code}</span></td>
+    <td>${s.class}</td>
+    <td>${s.teacherId}</td>
+    <td><div class="action-btns">
+      <button class="edit-btn" onclick="openEditSubject('${s._id}','${s.name}','${s.code}','${s.class}','${s.teacherId}')">Change Teacher</button>
+      <button class="del-btn" onclick="deleteSubject('${s._id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+async function openSubjectModal() {
+  const [classes, teachers] = await Promise.all([
+    fetch('/api/admin/classes', { headers: H }).then(r => r.json()),
+    fetch('/api/admin/teachers', { headers: H }).then(r => r.json())
+  ]);
+  document.getElementById('sClass').innerHTML = '<option value="">-- Select Class --</option>' + classes.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  document.getElementById('sTeacher').innerHTML = '<option value="">-- Select Teacher --</option>' + teachers.map(t => `<option value="${t.collegeId}">${t.name} (${t.collegeId})</option>`).join('');
+  openModal('subject');
+}
+
+async function addSubject() {
+  const name = document.getElementById('sName').value.trim();
+  const code = document.getElementById('sCode').value.trim().toUpperCase();
+  const cls = document.getElementById('sClass').value;
+  const teacherId = document.getElementById('sTeacher').value;
+  if (!name || !code || !cls || !teacherId) { alert('Please fill all fields'); return; }
+  const res = await fetch('/api/admin/subjects', { method: 'POST', headers: H, body: JSON.stringify({ name, code, class: cls, teacherId }) });
+  const d = await res.json();
+  if (!res.ok) { alert('❌ ' + d.error); return; }
+  closeModal('subject');
+  document.getElementById('sName').value = ''; document.getElementById('sCode').value = '';
+  showMsg('subjectOk', 'Subject assigned ✅', 'ok');
+  loadSubjects(); loadStats();
+}
+
+async function openEditSubject(id, name, code, cls, teacherId) {
+  const teachers = await fetch('/api/admin/teachers', { headers: H }).then(r => r.json());
+  document.getElementById('editSubjectId').value = id;
+  document.getElementById('esName').value = name;
+  document.getElementById('esCode').value = code;
+  document.getElementById('esClass').value = cls;
+  document.getElementById('esTeacher').innerHTML = '<option value="">-- Select Teacher --</option>' + teachers.map(t => `<option value="${t.collegeId}" ${t.collegeId === teacherId ? 'selected' : ''}>${t.name} (${t.collegeId})</option>`).join('');
+  openModal('editSubject');
+}
+
+async function saveSubject() {
+  const id = document.getElementById('editSubjectId').value;
+  const teacherId = document.getElementById('esTeacher').value;
+  if (!teacherId) { showMsg('editSubjectErr', 'Please select a teacher', 'err'); return; }
+  const res = await fetch('/api/admin/subjects/' + id, { method: 'PUT', headers: H, body: JSON.stringify({ teacherId }) });
+  const d = await res.json();
+  if (!res.ok) { showMsg('editSubjectErr', d.error, 'err'); return; }
+  closeModal('editSubject');
+  showMsg('subjectOk', 'Teacher updated ✅', 'ok');
+  loadSubjects();
+}
+
+async function deleteSubject(id) {
+  if (!confirm('Delete this subject assignment?')) return;
+  await fetch('/api/admin/subjects/' + id, { method: 'DELETE', headers: H });
+  loadSubjects(); loadStats();
+}
+
+// ── STUDENTS ──
+async function loadStudents() {
+  const data = await fetch('/api/admin/students', { headers: H }).then(r => r.json());
+  const tb = document.getElementById('studentTable');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">No students registered yet.</td></tr>'; return; }
+  tb.innerHTML = data.map(s => `<tr>
+    <td><strong>${s.name}</strong></td>
+    <td>${s.collegeId}</td>
+    <td>${s.class || '-'}</td>
+    <td>${s.rollNo || '-'}</td>
+    <td><button class="del-btn" onclick="deleteStudent('${s._id}')">Delete</button></td>
+  </tr>`).join('');
+}
+
+async function deleteStudent(id) {
+  if (!confirm('Delete this student?')) return;
+  await fetch('/api/admin/students/' + id, { method: 'DELETE', headers: H });
+  loadStudents(); loadStats();
+}
+
+loadStats();
+</script>
+</body>
+</html>

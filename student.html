@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Dashboard | Attendance Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+
+:root {
+  --navy: #1e2a78;
+  --blue: #1976d2;
+  --teal: #2f7fa1;
+  --orange: #ef6c00;
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --text: #1a2332;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --present: #16a34a;
+  --absent: #dc2626;
+  --warning: #f59e0b;
+}
+
+body { background: var(--bg); color: var(--text); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: linear-gradient(160deg, var(--navy) 0%, #1a3a6b 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-brand h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.sidebar-brand p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+
+.profile-card {
+  padding: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.profile-avatar {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, var(--orange), #ff8f00);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 20px rgba(239,108,0,0.4);
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.profile-role {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.profile-detail {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 4px;
+}
+
+.profile-detail span { color: rgba(255,255,255,0.5); }
+
+.sidebar-nav {
+  padding: 16px 12px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+.nav-item .icon { font-size: 18px; width: 22px; }
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+}
+
+.logout-btn:hover { background: rgba(220,38,38,0.2); color: #fca5a5; }
+
+/* ── MAIN ── */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.topbar {
+  background: var(--card);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+.topbar p { font-size: 13px; color: var(--muted); }
+
+.mini-calendar {
+  background: linear-gradient(135deg, var(--navy), var(--teal));
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 18px;
+  min-width: 220px;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cal-header button {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  font-size: 11px;
+}
+
+.cal-day-label { text-align: center; color: rgba(255,255,255,0.5); padding: 2px 0; font-size: 10px; }
+.cal-day { text-align: center; padding: 4px 2px; border-radius: 4px; cursor: pointer; }
+.cal-day:hover { background: rgba(255,255,255,0.15); }
+.cal-day.today { background: var(--orange); font-weight: 700; border-radius: 50%; }
+.cal-day.other-month { color: rgba(255,255,255,0.3); }
+
+.content { padding: 28px; flex: 1; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.stat-card .val {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-card .lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+.val.green { color: var(--present); }
+.val.red { color: var(--absent); }
+.val.blue { color: var(--blue); }
+
+.warning-banner {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.subject-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.subject-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--blue), var(--teal));
+}
+
+.subject-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+  border-color: var(--blue);
+}
+
+.subject-card.selected {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(25,118,210,0.15);
+}
+
+.subject-card.warning-card::before { background: linear-gradient(90deg, var(--warning), #f97316); }
+
+.subj-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.subj-code { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+
+.progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.fill-green { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.fill-warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.fill-red { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pct-badge {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.subject-calendar-container {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.cal-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.full-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.full-cal-header h3 { font-size: 15px; font-weight: 600; }
+
+.full-cal-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.full-cal-nav button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+}
+
+.full-cal-nav button:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+.full-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.full-cal-label {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.full-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: default;
+  transition: all 0.15s;
+}
+
+.full-cal-day.other-month { color: #cbd5e1; }
+.full-cal-day.today-mark { border: 2px solid var(--blue); font-weight: 700; }
+.full-cal-day.present { background: #dcfce7; color: #15803d; font-weight: 700; }
+.full-cal-day.absent { background: #fee2e2; color: #b91c1c; font-weight: 700; }
+
+.legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+.ann-list { display: flex; flex-direction: column; gap: 14px; }
+
+.ann-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--blue);
+  transition: all 0.2s;
+}
+
+.ann-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+.ann-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.ann-message { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+.ann-meta { font-size: 12px; color: #94a3b8; display: flex; gap: 16px; }
+
+.ann-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #dbeafe;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>📋 AttendanceTrack</h2>
+      <p>Student Portal</p>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileInitial">R</div>
+      <div class="profile-name" id="profileName">Loading...</div>
+      <div class="profile-role">Student</div>
+      <div class="profile-detail"><span>Roll No: </span><span id="profileRoll">—</span></div>
+      <div class="profile-detail"><span>Class: </span><span id="profileClass">—</span></div>
+      <div class="profile-detail"><span>Branch: </span><span id="profileBranch">—</span></div>
+      <div class="profile-detail"><span>Year: </span><span id="profileYear">—</span></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="switchTab('attendance', event)">
+        <span class="icon">📅</span> Attendance
+      </div>
+      <div class="nav-item" onclick="switchTab('announcements', event)">
+        <span class="icon">📢</span> Announcements
+        <span id="annBadge" style="display:none;background:#ef6c00;color:#fff;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:auto;">0</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="tabTitle">My Attendance</h1>
+        <p id="tabSubtitle">Track your subject-wise attendance</p>
+      </div>
+      <div class="mini-calendar" id="miniCal"></div>
+    </div>
+
+    <div class="content">
+      <!-- ATTENDANCE TAB -->
+      <div class="tab-panel active" id="tab-attendance">
+        <div class="overview-grid" id="overviewGrid"></div>
+
+        <div class="warning-banner" id="warningBanner" style="display:none">
+          ⚠️ <span id="warningText"></span>
+        </div>
+
+        <div class="section-title">📚 Subjects</div>
+        <div class="subjects-grid" id="subjectsGrid">
+          <div class="empty-state"><div class="icon">⏳</div><p>Loading subjects...</p></div>
+        </div>
+
+        <div class="subject-calendar-container" id="subjectCalContainer" style="display:none">
+          <div class="cal-title" id="calTitle">📅 Attendance Calendar</div>
+          <div class="full-cal-header">
+            <h3 id="calMonthYear"></h3>
+            <div class="full-cal-nav">
+              <button onclick="changeCalMonth(-1)">← Prev</button>
+              <button onclick="changeCalMonth(1)">Next →</button>
+            </div>
+          </div>
+          <div class="full-cal-grid" id="fullCalGrid"></div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #16a34a"></div>Present</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #dc2626"></div>Absent</div>
+            <div class="legend-item"><div class="legend-dot" style="border:2px solid #1976d2"></div>Today</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS TAB -->
+      <div class="tab-panel" id="tab-announcements">
+        <div class="ann-list" id="annList">
+          <div class="empty-state"><div class="icon">⏳</div><p>Loading announcements...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = '';
+let token = localStorage.getItem('token');
+let user = JSON.parse(localStorage.getItem('user') || 'null');
+let attendanceData = [];
+let selectedSubject = null;
+let calYear, calMonth;
+
+if (!token || !user || user.role !== 'student') {
+  window.location.href = 'index.html';
+}
+
+window.onload = () => {
+  setProfile();
+  renderMiniCalendar();
+  loadAttendance();
+  loadAnnouncements();
+};
+
+function setProfile() {
+  document.getElementById('profileInitial').textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = user.name;
+  document.getElementById('profileRoll').textContent = user.rollNo || '—';
+  document.getElementById('profileClass').textContent = user.class || '—';
+  document.getElementById('profileBranch').textContent = user.branch || user.department || '—';
+  document.getElementById('profileYear').textContent = user.year || '—';
+}
+
+function switchTab(tab, ev) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  // find the nav-item that triggered this
+  const navItem = ev.currentTarget;
+  navItem.classList.add('active');
+
+  if (tab === 'attendance') {
+    document.getElementById('tabTitle').textContent = 'My Attendance';
+    document.getElementById('tabSubtitle').textContent = 'Track your subject-wise attendance';
+  } else {
+    document.getElementById('tabTitle').textContent = 'Announcements';
+    document.getElementById('tabSubtitle').textContent = 'Messages from your teachers';
+    document.getElementById('annBadge').style.display = 'none';
+  }
+}
+
+// ── ATTENDANCE ──
+async function loadAttendance() {
+  try {
+    if (!user.class) {
+      document.getElementById('subjectsGrid').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>No class assigned to your account. Contact admin.</p></div>';
+      return;
+    }
+
+    const subjRes = await fetch(`/api/subjects/class/${encodeURIComponent(user.class)}`, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+
+    if (!subjRes.ok) {
+      throw new Error('Failed to fetch subjects: ' + subjRes.status);
+    }
+
+    const subjects = await subjRes.json();
+
+    if (!subjects || subjects.length === 0) {
+      document.getElementById('subjectsGrid').innerHTML = '<div class="empty-state"><div class="icon">📚</div><p>No subjects found for your class yet.</p></div>';
+      // Still render empty overview
+      renderOverview([]);
+      return;
+    }
+
+    attendanceData = await Promise.all(subjects.map(async (subject) => {
+      const subId = subject.subjectId || subject._id;
+      try {
+        const attRes = await fetch(`/api/attendance/student-subject/${user._id}/${subId}`, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        if (!attRes.ok) {
+          const errText = await attRes.text();
+          console.error(`Attendance API failed for subject ${subject.name}:`, errText);
+          throw new Error("Attendance fetch failed");
+        }
+        const records = await attRes.json();
+        const present = records.filter(r => r.status === 'present').length;
+        const total = records.length;
+        const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+        return { subject, records, present, total, percentage };
+      }
+      catch (err) {
+        console.error("Error for subject:", subject._id, err);
+        return { subject, records: [], present: 0, total: 0, percentage: 0 };
+      }
+    }));
+
+    renderOverview(attendanceData);
+    renderSubjects();
+  } catch (e) {
+    console.error('loadAttendance error:', e);
+    document.getElementById('subjectsGrid').innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Error loading subjects: ${e.message}</p></div>`;
+  }
+}
+
+function renderOverview(data) {
+  const d = data || attendanceData;
+  let totalPresent = 0, totalClasses = 0;
+  d.forEach(item => { totalPresent += item.present; totalClasses += item.total; });
+  const overallPct = totalClasses > 0 ? Math.round((totalPresent / totalClasses) * 100) : 0;
+  const lowCount = d.filter(item => item.total > 0 && item.percentage < 75).length;
+
+  document.getElementById('overviewGrid').innerHTML = `
+    <div class="stat-card"><div class="val blue">${d.length}</div><div class="lbl">Subjects</div></div>
+    <div class="stat-card"><div class="val green">${totalPresent}</div><div class="lbl">Classes Attended</div></div>
+    <div class="stat-card"><div class="val red">${totalClasses - totalPresent}</div><div class="lbl">Classes Missed</div></div>
+    <div class="stat-card"><div class="val ${overallPct >= 75 ? 'green' : 'red'}">${overallPct}%</div><div class="lbl">Overall Attendance</div></div>
+  `;
+
+  if (lowCount > 0) {
+    document.getElementById('warningBanner').style.display = 'flex';
+    document.getElementById('warningText').textContent = `You have low attendance (below 75%) in ${lowCount} subject${lowCount > 1 ? 's' : ''}. Please attend classes regularly.`;
+  }
+}
+
+function renderSubjects() {
+  if (!attendanceData.length) {
+    document.getElementById('subjectsGrid').innerHTML = '<div class="empty-state"><div class="icon">📚</div><p>No subjects found</p></div>';
+    return;
+  }
+
+  document.getElementById('subjectsGrid').innerHTML = attendanceData.map(d => {
+    const pct = d.percentage;
+    const fillClass = pct >= 75 ? 'fill-green' : pct >= 60 ? 'fill-warning' : 'fill-red';
+    const pctColor = pct >= 75 ? '#16a34a' : pct >= 60 ? '#f59e0b' : '#dc2626';
+    const isWarning = d.total > 0 && pct < 75;
+    const subId = d.subject.subjectId || d.subject._id;
+    return `
+      <div class="subject-card ${isWarning ? 'warning-card' : ''}" onclick="selectSubject('${subId}', event)">
+        <div class="pct-badge" style="color:${pctColor}">${pct}%</div>
+        <div class="subj-name">${d.subject.name}</div>
+        <div class="subj-code">${d.subject.code} · ${d.subject.class}</div>
+        <div class="progress-bar"><div class="progress-fill ${fillClass}" style="width:${pct}%"></div></div>
+        <div class="progress-stats">
+          <span>${d.present} present / ${d.total} total</span>
+          <span>${d.total === 0 ? '—' : isWarning ? '⚠️ Low' : '✅ Good'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectSubject(subjectId, ev) {
+  selectedSubject = attendanceData.find(d => (d.subject.subjectId || d.subject._id).toString() === subjectId.toString());
+  if (!selectedSubject) return;
+
+  document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected'));
+  ev.currentTarget.classList.add('selected');
+
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+
+  document.getElementById('calTitle').textContent = `📅 ${selectedSubject.subject.name} — Attendance Calendar`;
+  document.getElementById('subjectCalContainer').style.display = 'block';
+  document.getElementById('subjectCalContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderFullCalendar();
+}
+
+function renderFullCalendar() {
+  if (!selectedSubject) return;
+  const records = selectedSubject.records;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthYear').textContent = `${months[calMonth]} ${calYear}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = days.map(d => `<div class="full-cal-label">${d}</div>`).join('');
+
+  for (let i = 0; i < firstDay; i++) {
+    const prevDate = new Date(calYear, calMonth, -firstDay + i + 1).getDate();
+    html += `<div class="full-cal-day other-month">${prevDate}</div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const record = records.find(r => r.date === dateStr);
+    const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d;
+    let cls = 'full-cal-day';
+    if (record?.status === 'present') cls += ' present';
+    else if (record?.status === 'absent') cls += ' absent';
+    if (isToday) cls += ' today-mark';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+
+  document.getElementById('fullCalGrid').innerHTML = html;
+}
+
+function changeCalMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderFullCalendar();
+}
+
+// ── ANNOUNCEMENTS ──
+async function loadAnnouncements() {
+  try {
+    const res = await fetch(`/api/announcements/${encodeURIComponent(user.class)}`, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const anns = await res.json();
+    renderAnnouncements(anns);
+    if (anns.length > 0) {
+      document.getElementById('annBadge').style.display = 'inline';
+      document.getElementById('annBadge').textContent = anns.length;
+    }
+  } catch (e) { console.error(e); }
+}
+
+function renderAnnouncements(anns) {
+  if (!anns.length) {
+    document.getElementById('annList').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No announcements yet</p></div>';
+    return;
+  }
+  document.getElementById('annList').innerHTML = anns.map(a => {
+    const date = new Date(a.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const time = new Date(a.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="ann-card">
+        ${a.isPublic ? '<span class="ann-badge">📢 Public Announcement</span>' : `<span class="ann-badge">🏫 ${(a.targetClass || []).join(', ')}</span>`}
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-message">${a.message}</div>
+        <div class="ann-meta"><span>👨‍🏫 ${a.teacherName}</span><span>📅 ${date} at ${time}</span></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── MINI CALENDAR ──
+let miniDate = new Date();
+function renderMiniCalendar() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const year = miniDate.getFullYear();
+  const month = miniDate.getMonth();
+  const today = new Date();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  let html = `
+    <div class="cal-header">
+      <button onclick="miniNav(-1)">‹</button>
+      <span>${months[month]} ${year}</span>
+      <button onclick="miniNav(1)">›</button>
+    </div>
+    <div class="cal-grid">
+      ${['S','M','T','W','T','F','S'].map(d => `<div class="cal-day-label">${d}</div>`).join('')}
+  `;
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+    html += `<div class="cal-day ${isToday ? 'today' : ''}">${d}</div>`;
+  }
+  html += '</div>';
+  document.getElementById('miniCal').innerHTML = html;
+}
+
+function miniNav(dir) {
+  miniDate.setMonth(miniDate.getMonth() + dir);
+  renderMiniCalendar();
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = 'index.html';
+}
+</script>
+</body>
+</html>
