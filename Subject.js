@@ -7,13 +7,7 @@ const SubjectSchema = new mongoose.Schema({
   class: { type: String, required: true }
 }, { timestamps: true });
 
-// Ensure course code is unique per class
-subjectSchema.index({ code: 1 }, { unique: true });
-const Subject = mongoose.model('Subject', SubjectSchema);
+// ✅ GLOBAL unique code
+SubjectSchema.index({ code: 1 }, { unique: true });
 
-// Automatically drop the globally unique index if it exists from previous code
-mongoose.connection.on('connected', () => {
-  Subject.collection.dropIndex('code_1').catch(() => {});
-});
-
-module.exports = Subject;
+module.exports = mongoose.model('Subject', SubjectSchema);
