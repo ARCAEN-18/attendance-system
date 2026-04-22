@@ -8,7 +8,7 @@ const SubjectSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Ensure course code is unique per class
-SubjectSchema.index({ code: 1, class: 1 }, { unique: true });
+subjectSchema.index({ code: 1 }, { unique: true });
 
 const Subject = mongoose.model('Subject', SubjectSchema);
 
