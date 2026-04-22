@@ -101,7 +101,7 @@ if (existing) {
     if (e.code === 11000) {
   return res.status(400).json({ error: `Course code "${upperCode}" already exists.` });
 }
-});
+  };
 router.put('/subjects/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { teacherId } = req.body;
