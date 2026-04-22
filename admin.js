@@ -100,8 +100,7 @@ router.post('/subjects', authMiddleware, adminOnly, async (req, res) => {
   } catch (e) {
     console.error(e);
     if (e.code === 11000) {
-      return res.status(400).json({ error: `Course code already assigned to this class.` });
-    }
+return res.status(400).json({ error: `Course code "${upperCode}" already exists.` });    }
     res.status(500).json({ error: 'Server error' });
   }
 });
