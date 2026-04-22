@@ -89,7 +89,7 @@ router.post('/subjects', authMiddleware, adminOnly, async (req, res) => {
     if (!teacher) return res.status(400).json({ error: `Teacher with ID "${teacherId}" not found` });
 
     // Check course code is unique per class
-    const existing = await Subject.findOne({ code: upperCode, class: cls });
+  const existing = await Subject.findOne({ code: upperCode });
     if (existing) {
       return res.status(400).json({ error: `Course code "${upperCode}" is already assigned to class "${cls}".` });
     }
