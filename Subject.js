@@ -9,7 +9,6 @@ const SubjectSchema = new mongoose.Schema({
 
 // Ensure course code is unique per class
 subjectSchema.index({ code: 1 }, { unique: true });
-
 const Subject = mongoose.model('Subject', SubjectSchema);
 
 // Automatically drop the globally unique index if it exists from previous code
